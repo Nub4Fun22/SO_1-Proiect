@@ -1,0 +1,3 @@
+/mnt/c/Facultate/SO1/cmake-build-debug/CMakeFiles/SO.dir
+/mnt/c/Facultate/SO1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/mnt/c/Facultate/SO1/cmake-build-debug/CMakeFiles/rebuild_cache.dir

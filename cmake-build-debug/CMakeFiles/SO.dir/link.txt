@@ -1,1 +1,0 @@
-/bin/gcc -g CMakeFiles/SO.dir/main.c.o CMakeFiles/SO.dir/City_Manager.c.o -o SO 

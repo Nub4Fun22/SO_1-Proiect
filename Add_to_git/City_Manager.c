@@ -79,8 +79,52 @@ void add_report(const char* district, const char* role, const char* user) {
     if (symlink(filepath, symlink_name) < 0) {
         perror("symlink failed");
     }
+    // --- PHASE 2: NOTIFY MONITOR AND LOG ACTION ---
+    int notified = 0;
+    int pid_fd = open(".monitor_pid", O_RDONLY);
 
-    printf("Report added successfully!\n");
+    if (pid_fd >= 0) {
+        char pid_buffer[32];
+        memset(pid_buffer, 0, sizeof(pid_buffer));
+        int bytes_read = read(pid_fd, pid_buffer, sizeof(pid_buffer) - 1);
+        close(pid_fd);
+
+        if (bytes_read > 0) {
+            pid_t monitor_pid = atoi(pid_buffer);
+            if (monitor_pid > 0) {
+                // Send SIGUSR1 to the monitor
+                if (kill(monitor_pid, SIGUSR1) == 0) {
+                    notified = 1;
+                }
+            }
+        }
+    }
+
+    // Write to the logged_district file
+    char log_filepath[256];
+    sprintf(log_filepath, "%s/logged_district", district);
+
+    // Open in append mode, create if missing with 0644 perms
+    int log_fd = open(log_filepath, O_CREAT | O_WRONLY | O_APPEND, 0644);
+    if (log_fd >= 0) {
+        char log_msg[512];
+        time_t now = time(NULL);
+
+        if (notified) {
+            sprintf(log_msg, "[%ld] User: %s | Role: %s | Action: Added Report | Monitor: SUCCESSFULLY NOTIFIED (SIGUSR1)\n",
+                    now, user, role);
+        } else {
+            sprintf(log_msg, "[%ld] User: %s | Role: %s | Action: Added Report | Monitor: FAILED TO NOTIFY (Monitor offline or kill failed)\n",
+                    now, user, role);
+        }
+
+        write(log_fd, log_msg, strlen(log_msg));
+        close(log_fd);
+    } else {
+        perror("Warning: Could not open logged_district to record action");
+    }
+
+    printf("Report added! Monitor notified: %s\n", notified ? "YES" : "NO");
 }
 
 void list_reports(const char* district, const char* role, const char* user) {
@@ -272,4 +316,44 @@ void update_threshold(const char* district, int value, const char* role, const c
     }
 
     close(fd);
+}
+
+void remove_district(const char* district, const char* role, const char* user) {
+    if (strcmp(role, "manager") != 0) {
+        printf("Permission denied: Only managers can remove districts.\n");
+        exit(1);
+    }
+
+    // Danger check: Prevent someone from doing "--remove_district /"
+    if (strchr(district, '/') != NULL || strcmp(district, "..") == 0) {
+        printf("Error: Invalid district name. Path traversal detected.\n");
+        exit(1);
+    }
+
+    printf("Removing district '%s' and all its contents...\n", district);
+
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        perror("fork failed");
+        exit(1);
+    } else if (pid == 0) {
+        // We are in the child process. Execute rm -rf
+        execlp("rm", "rm", "-rf", district, NULL);
+
+        // If execlp succeeds, this line is NEVER reached.
+        perror("execlp failed");
+        exit(1);
+    } else {
+        // We are in the parent process. Wait for child to finish deleting.
+        int status;
+        waitpid(pid, &status, 0);
+
+        // Remove the symlink
+        char symlink_name[256];
+        sprintf(symlink_name, "active_reports-%s", district);
+        unlink(symlink_name);
+
+        printf("District '%s' successfully removed.\n", district);
+    }
 }

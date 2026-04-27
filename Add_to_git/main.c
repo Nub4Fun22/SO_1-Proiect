@@ -49,9 +49,12 @@ int main(int argc, char** argv) {
             exit(1);
         }
         update_threshold(district, atoi(extra_arg), role, user);
-    } else {
+    }
+    else if (strcmp(command, "remove_district") == 0) {
+        remove_district(district, role, user);
+    }
+    else {
         printf("Unknown command: %s\n", command);
     }
-
-    return 0;
+        return 0;
 }

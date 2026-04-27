@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <dirent.h>
 #include <string.h>
 #include <fcntl.h>
@@ -28,6 +29,7 @@ void list_reports(const char* district, const char* role, const char* user);
 void remove_report(const char* district, int report_id, const char* role, const char* user);
 void filter_reports(const char* district, const char* condition, const char* role, const char* user);
 void update_threshold(const char* district, int value, const char* role, const char* user);
+void remove_district(const char* district, const char* role, const char* user);
 
 // AI-Assisted functions
 int parse_condition(const char *input, char *field, char *op, char *value);

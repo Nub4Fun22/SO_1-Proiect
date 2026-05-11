@@ -345,15 +345,16 @@ void remove_district(const char* district, const char* role, const char* user) {
         perror("execlp failed");
         exit(1);
     } else {
-        // We are in the parent process. Wait for child to finish deleting.
-        int status;
-        waitpid(pid, &status, 0);
-
         // Remove the symlink
         char symlink_name[256];
         sprintf(symlink_name, "active_reports-%s", district);
         unlink(symlink_name);
 
         printf("District '%s' successfully removed.\n", district);
+
+        // We are in the parent process. Wait for child to finish deleting.
+        int status;
+        waitpid(pid, &status, 0);
+
     }
 }

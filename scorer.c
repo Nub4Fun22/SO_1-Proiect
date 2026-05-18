@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h> // Required for time_t in your struct
+#include <time.h> 
 
-// Your exact struct from Phase 1
 typedef struct {
     int report_id;
     char inspector_name[100];
@@ -85,7 +84,7 @@ int main(int argc, char *argv[]) {
                    scoreboard[i].name, scoreboard[i].total_score);
         }
     }
-    printf("\n"); // Add a blank line for readability between districts
+    printf("\n"); // Add a blank line for readability
 
     return 0;
 }

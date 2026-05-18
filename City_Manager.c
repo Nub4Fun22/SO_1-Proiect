@@ -352,9 +352,5 @@ void remove_district(const char* district, const char* role, const char* user) {
 
         printf("District '%s' successfully removed.\n", district);
 
-        // We are in the parent process. Wait for child to finish deleting.
-        int status;
-        waitpid(pid, &status, 0);
-
     }
 }

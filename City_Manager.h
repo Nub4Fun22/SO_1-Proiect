@@ -10,6 +10,9 @@
 #include <dirent.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <errno.h>
 
 typedef struct {
     int report_id;

@@ -62,11 +62,12 @@ void add_report(const char* district, const char* role, const char* user) {
     r.report_id = time(NULL) % 1000;
     strcpy(r.inspector_name, user);
     r.timestamp = time(NULL);
-    r.lat = 45.75;
-    r.lon = 21.23;
+    // should generate some random float coordonates from [0,100]
+    r.lat = (float)rand()/(float)(RAND_MAX/100);
+    r.lon = (float)rand()/(float)(RAND_MAX/100);
     strcpy(r.category, "road");
     while ((r.severity=rand()%4)==0)
-    strcpy(r.description, "Pothole detected.");
+        strcpy(r.description, "Pothole detected.");
 
     if (write(fd, &r, sizeof(Report)) < 0) {
         perror("write failed");
